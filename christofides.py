@@ -2,10 +2,8 @@
 Esse código diferente do código "christofies_simplificado" foca na robustez da implementação, no código anterior foram usados 
 dicionários de listas de tuplas para facilitar o entendimento, as chaves eram os vértices e a lista de valores eram as arestas, com destino e peso,
 neste código, o grafo de entrada, completo e não direcionado será representado como uma matriz de adjacências usando matriz normal, e não como
-uma lista de adjacências, essa é a representação ideal para grafos densos (mais robusto). Nas estruturas seguintes do algoritmo, como a árvore geradora mínima
-e em certas partes de funções para acessar o grafo original que agora é uma matriz, serão ligeiramente diferentes. A árvore será representada agora
-como um dicionário de dicionário de inteiros, a chave do primeiro dicionario representam os vértices, os sub-dicionários as arestas (mais especificamente o destino),
-e os valores inteiros os pesos, a lógica das funções e o fluxo do programa continua o mesmo, prim, hierholzer, emparelhamento etc...
+uma lista de adjacências, essa é a representação ideal para grafos densos (mais robusto). A lógica das funções e o fluxo do programa continua o mesmo, prim, hierholzer,
+emparelhamento etc...
 '''
 import networkx as nx
 import heapq
@@ -18,34 +16,34 @@ def leitura_arquivo(caminho: str):
     matriz = []
 
     for i in range(n):
-        linha = list(map(int, linhas[i + 1].split()))
+        linha = list(map(float, linhas[i + 1].split()))
         matriz.append(linha)
 
-    return matriz # retorna direto a matriz como matriz de adjacencias
+    return matriz
 
 def prim(grafo):
-    vertices = len(grafo)
-    visitados = set() 
-    mst = {v: {} for v in range(vertices)}
+    vertices = list(range(len(grafo)))
+    visitados = set()
+    mst = {v: [] for v in vertices}
 
-    start = 0
-    visitados.add(start)
+    inicio = vertices[0]
+    visitados.add(inicio)
 
-    heap = [] 
-    for j in range(vertices):
-         heapq.heappush(heap, (grafo[start][j], start, j)) # peso, origem, destino
+    heap = []
+    for destino in vertices:
+        if destino not in visitados:
+            heapq.heappush(heap, (grafo[inicio][destino], inicio, destino))  # (peso, origem, destino)
 
     while heap:
         peso, origem, destino = heapq.heappop(heap)
         if destino not in visitados:
             visitados.add(destino)
-            mst[origem][destino] = peso
-            mst[destino][origem] = peso
-            for aresta in range(vertices):
-                if aresta not in visitados:
-                    if aresta != destino:
-                     heapq.heappush(heap, (grafo[destino][aresta], destino, aresta)) # peso, origem, destino
-                    
+            mst[origem].append((destino, peso))
+            mst[destino].append((origem, peso))
+            for aresta in vertices:
+                    if aresta not in visitados:
+                        heapq.heappush(heap, (grafo[destino][aresta], destino, aresta))  # (peso, origem, destino)
+
     return mst
 
 def vertices_impares(arvore_geradora):
@@ -62,33 +60,28 @@ def grafo_auxiliar(grafo, vertices):
 
 def ciclo_euleriano(grafo):
     circuito = []
-    start = next(iter(grafo))
-    
-    stack = [start]
+    stack = [0]
+
     while stack:
         atual = stack[-1]
         if grafo[atual]:
-            proxima = next(iter(grafo[atual]))
-            del grafo[atual][proxima]
-            del grafo[proxima][atual]
-            
-            stack.append(proxima)
+            proxima = grafo[atual].pop(0)
+            grafo[proxima[0]].remove((atual, proxima[1]))
+            stack.append(proxima[0])
         else:
             circuito.append(stack.pop())
     return circuito
 
 def ciclo_hamiltoniano(circuito):
-    visitados = set()
-    caminho = []
+    ciclo = []
     for v in circuito:
-        if v not in visitados:
-            visitados.add(v)
-            caminho.append(v)
-    caminho.append(caminho[0])
-    return caminho
+        if v not in ciclo:
+            ciclo.append(v)
+    ciclo.append(ciclo[0])
+    return ciclo
 
 def custo_total(grafo, ciclo):
-    total = 0
+    total = 0.0
     for i in range(len(ciclo) - 1):
         origem = ciclo[i]
         destino = ciclo[i + 1]
@@ -99,20 +92,32 @@ def custo_total(grafo, ciclo):
 def christofides():
     grafo = leitura_arquivo("grafo.txt")
     mst = prim(grafo)
+
+    print("Arvore geradora minima: \n")
+    print(mst)
+    peso_mst = 0.0
+    for v in mst.values():
+        for (_, p) in v:
+            peso_mst += p
+
+    print(f"\nPeso total da Arvore geradora Minima: {peso_mst / 2}\n")
+
     impares = vertices_impares(mst)
     aux = grafo_auxiliar(grafo, impares)
     emparelhamento = nx.algorithms.matching.min_weight_matching(aux)
 
     for u, v in emparelhamento:
-        mst[u][v] = grafo[u][v]
-        mst[v][u] = grafo[u][v]
+        peso = grafo[u][v]
+        mst[u].append((v, peso))
+        mst[v].append((u, peso))
 
     circuito = ciclo_euleriano(mst)
     ciclo_final = ciclo_hamiltoniano(circuito)
     custo = custo_total(grafo, ciclo_final)
 
+    print("Solucao aproximada encontrada por Christofides: ")
     print(" -> ".join(map(str, ciclo_final)))
-    print(f"Peso total do ciclo hamiltoniano: {custo}")
+    print(f"\nPeso total da solucao: {custo}")
 
 if __name__ == "__main__":
     christofides()
