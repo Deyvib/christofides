@@ -7,6 +7,8 @@ emparelhamento etc...
 '''
 import networkx as nx
 import heapq
+import matplotlib.pyplot as plt
+import math
 
 def leitura_arquivo(caminho: str):
     with open(caminho, 'r') as f:
@@ -80,17 +82,19 @@ def ciclo_hamiltoniano(circuito):
     ciclo.append(ciclo[0])
     return ciclo
 
-def custo_total(grafo, ciclo):
+def custo_total(G, grafo, ciclo):
     total = 0.0
     for i in range(len(ciclo) - 1):
         origem = ciclo[i]
         destino = ciclo[i + 1]
         peso = grafo[origem][destino]
         total += peso
-    return total
+        G.add_edge(origem, destino, weight=peso)
+
+    return total, G
 
 def christofides():
-    grafo = leitura_arquivo("grafo.txt")
+    grafo = leitura_arquivo("grafo2.txt")
     mst = prim(grafo)
 
     print("Arvore geradora minima: \n")
@@ -113,11 +117,22 @@ def christofides():
 
     circuito = ciclo_euleriano(mst)
     ciclo_final = ciclo_hamiltoniano(circuito)
-    custo = custo_total(grafo, ciclo_final)
+    G = nx.Graph()
+    custo, G = custo_total(G, grafo, ciclo_final)
 
     print("Solucao aproximada encontrada por Christofides: ")
     print(" -> ".join(map(str, ciclo_final)))
-    print(f"\nPeso total da solucao: {custo}")
+    print(f"\nPeso total da solucao: {custo}\n")
+
+    raiz = 10 / math.sqrt(len(grafo))
+    pos = nx.spring_layout(G, seed=81, k=raiz, scale=10)
+    edge_labels = {(u, v): f"{d['weight']:.1f}" for u, v, d in G.edges(data=True)}
+
+    plt.figure(figsize=(12, 10))
+    nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='blue', node_size=500, font_size=8)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=10)
+    plt.axis('off')
+    plt.show()
 
 if __name__ == "__main__":
     christofides()
