@@ -26,7 +26,7 @@ def prim(grafo): # Algoritmo de prim para encontrar a árvore geradora mínima
 
     heap = [] # Inicializa o heap para armazenar as arestas com os menores pesos
     for destino in vertices: # Itera sobre todos os vértices do grafo completo
-        if destino not in visitados: # Se não existir na árvore, adiciona a aresta ao heap que organiza da de menor peso para a de maior peso
+        if destino not in visitados: # Se não existir na árvore, adiciona a aresta ao heap que mantém a aresta de menor peso no "topo"
             # Nesse caso, todas as arestas conectadas ao vértice inicial serão adicionadas
             heapq.heappush(heap, (grafo[inicio][destino], inicio, destino))  # (peso, origem, destino)
 
