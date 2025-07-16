@@ -26,7 +26,7 @@ def prim(grafo): # Algoritmo de prim para encontrar a árvore geradora mínima
 
     heap = [] # Inicializa o heap para armazenar as arestas com os menores pesos
     for destino in vertices: # Itera sobre todos os vértices do grafo completo
-        if destino not in visitados: # Se não existir na árvore, adiciona a aresta ao heap que mantém a aresta de menor peso no "topo"
+        if grafo[inicio][destino] > 0 and destino not in visitados: # Se não existir na árvore, adiciona a aresta ao heap que mantém a aresta de menor peso no "topo"
             # Nesse caso, todas as arestas conectadas ao vértice inicial serão adicionadas
             heapq.heappush(heap, (grafo[inicio][destino], inicio, destino))  # (peso, origem, destino)
 
@@ -37,7 +37,7 @@ def prim(grafo): # Algoritmo de prim para encontrar a árvore geradora mínima
             mst[origem].append((destino, peso)) # Adiciona a aresta na lista de adjacência do vértice de origem
             mst[destino].append((origem, peso)) # E o mesmo para o vértice de destino para manter a simetria do grafo não direcionado
             for aresta in vertices: # Itera sobre todos os vértices do grafo completo
-                    if aresta not in visitados: # Caso o vértice não exista na árvore, adicionamos as arestas do vértice destino da aresta anterior até ele
+                    if grafo[destino][aresta] > 0 and aresta not in visitados: # Caso o vértice não exista na árvore, adicionamos as arestas do vértice destino da aresta anterior até ele
                         heapq.heappush(heap, (grafo[destino][aresta], destino, aresta))  # (peso, origem, destino)
 
     return mst
@@ -50,8 +50,8 @@ def grafo_auxiliar(grafo, vertices): # Função que cria a estrutura aceita pela
     G = nx.Graph() # Inicializa a estrutura do grafo
     for u in vertices:
         for v in vertices: # Itera sobre todas as possibilidades de duplas de vértices
-            if u != v: # Ignora quando os vértices forem iguais
-                peso = grafo[u][v] # Pega o peso da aresta (u, v)
+            peso = grafo[u][v] # Pega o peso da aresta (u, v)
+            if peso > 0 and u != v: # Ignora quando os vértices forem iguais
                 G.add_edge(u, v, weight=peso) # Adiciona a aresta no grafo especificando o peso (weight)
     return G # Retorna o grafo completo
 
@@ -88,7 +88,7 @@ def custo_total(grafo, ciclo): # Recebe o grafo completo, e o ciclo hamiltoniano
     return total
 
 def christofides(): # Função principal
-    grafo = leitura_arquivo("berlin52.txt") # Informa o nome do arquivo .txt com a matriz de adjacência para passar para a função
+    grafo = leitura_arquivo("d657.txt") # Informa o nome do arquivo .txt com a matriz de adjacência para passar para a função
     mst = prim(grafo) # Encontra a árvore geradora mínima com base no grafo completo
 
     print("Arvore geradora minima: \n")
