@@ -26,7 +26,7 @@ def prim(grafo): # Algoritmo de prim para encontrar a árvore geradora mínima
 
     heap = [] # Inicializa o heap para armazenar as arestas com os menores pesos
     for destino in vertices: # Itera sobre todos os vértices do grafo completo
-        if grafo[inicio][destino] > 0 and destino not in visitados: # Se não existir na árvore, adiciona a aresta ao heap que mantém a aresta de menor peso no "topo"
+        if destino not in visitados: # Se não existir na árvore, adiciona a aresta ao heap que mantém a aresta de menor peso no "topo"
             # Nesse caso, todas as arestas conectadas ao vértice inicial serão adicionadas
             heapq.heappush(heap, (grafo[inicio][destino], inicio, destino))  # (peso, origem, destino)
 
@@ -37,7 +37,7 @@ def prim(grafo): # Algoritmo de prim para encontrar a árvore geradora mínima
             mst[origem].append((destino, peso)) # Adiciona a aresta na lista de adjacência do vértice de origem
             mst[destino].append((origem, peso)) # E o mesmo para o vértice de destino para manter a simetria do grafo não direcionado
             for aresta in vertices: # Itera sobre todos os vértices do grafo completo
-                    if grafo[destino][aresta] > 0 and aresta not in visitados: # Caso o vértice não exista na árvore, adicionamos as arestas do vértice destino da aresta anterior até ele
+                    if aresta not in visitados: # Caso o vértice não exista na árvore, adicionamos as arestas do vértice destino da aresta anterior até ele
                         heapq.heappush(heap, (grafo[destino][aresta], destino, aresta))  # (peso, origem, destino)
 
     return mst
@@ -88,7 +88,7 @@ def custo_total(grafo, ciclo): # Recebe o grafo completo, e o ciclo hamiltoniano
     return total
 
 def christofides(): # Função principal
-    grafo = leitura_arquivo("d657.txt") # Informa o nome do arquivo .txt com a matriz de adjacência para passar para a função
+    grafo = leitura_arquivo("lin318.txt") # Informa o nome do arquivo .txt com a matriz de adjacência para passar para a função
     mst = prim(grafo) # Encontra a árvore geradora mínima com base no grafo completo
 
     print("Arvore geradora minima: \n")
