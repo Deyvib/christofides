@@ -12,4 +12,4 @@ Vá até o diretório do programa e rode-o com:
 
 Ou use alguma IDE 
 
-Ao executar o programa, uma solitação pedindo o caminho do arquivo aparecerá, o arquivo do grafo precisa estar dentro da mesma estrutura de diretórios de onde o código original está rodando
+Ao executar o programa, uma solicitação pedindo o caminho do arquivo aparecerá, o arquivo do grafo precisa estar dentro da mesma estrutura de diretórios de onde o código original está rodando
