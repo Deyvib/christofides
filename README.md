@@ -12,8 +12,4 @@ Vá até o diretório do programa e rode-o com:
 
 Ou use alguma IDE 
 
-Na linha:
-
-``` grafo = leitura_arquivo("berlin52.txt")  ```
-
-O parâmetro da função especifica o nome do arquivo com a matriz de adjacência, lembre-se de tê-lo no mesmo diretório do programa
+Ao executar o programa, uma solitação pedindo o caminho do arquivo aparecerá, o arquivo do grafo precisa estar dentro da mesma estrutura de diretórios de onde o código original está rodando
