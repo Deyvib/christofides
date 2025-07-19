@@ -1,20 +1,55 @@
 import networkx as nx # Biblioteca usada para o emparelhamento perfeito mínimo
 import heapq # Biblioteca usada para o heap mínimo em prim
+import os # Biblioteca usada para validar o acesso ao arquivo informado pelo usuário
 
-def leitura_arquivo(caminho: str): # Faz a leitura e tradução do arquivo .txt para a estrutura de matriz de adjacência
-    with open(caminho, 'r') as f: # Abre o arquivo enviado no modo leitura e o chama de f
-        linhas = f.read().splitlines() # Armazena f em linhas dividindo ele em uma lista de linhas
+def leitura_arquivo_e_validacao(caminho: str):
+    if not os.path.exists(caminho): # Verifica se o caminho especificado para o arquivo realmente existe
+        print(f"Erro: O arquivo '{caminho}' nao foi encontrado. Por favor, verifique o caminho e o nome do arquivo.")
+        return None, ""
 
-    n = int(linhas[0]) # Conforme especificado na descrição do trabalho, a primeira linha é o número de vértices
-    matriz = [] # Inicializa a matriz de adjacência
+    with open(caminho, 'r') as f: # Abre o arquivo no modo leitura e o chama de f
+        linhas = f.read().splitlines() # Faz a leitura dividindo entre linhas, e armazena em linhas, linhas é uma lista de strings que armazena as linhas do arquivo
 
-    for i in range(n): # Itera sobre o número de vértices - 1
-        linha = list(map(float, linhas[i + 1].split())) # Somamos +1 pois a primeira linha é o número de vértices
-        # Olhando de dentro para fora, cada linha é dividida onde existir espaços, transformando os valores ->
-        # Em ponto flutuante por meio da função map e transformando o retorno em uma lista (cada iteração gera uma lista de floats ou seja os pesos)
-        matriz.append(linha)
-        # Essa lista é adicionada à matriz formando a matriz de adjacência linha por linha
-    return matriz
+    if not linhas: # Verifica se linhas está vazia. Se linhas for vazia, é por que o arquivo .txt está vazio
+        print(f"Erro: O arquivo '{caminho}' esta vazio.")
+        return None, ""
+
+    try:
+        n = int(linhas[0]) # Pega a primeira linha do arquivo que é uma string (que especifica o número de vértices) transforma em inteiro e armazena em n
+    except ValueError: # Caso essa conversão não seja possível um erro será emitido, capturamos o erro e retornamos
+        print(f"Erro: A primeira linha do arquivo '{caminho}' deve ser um numero inteiro (quantidade de vertices).")
+        return None, ""
+
+    if n <= 0: # Verifica se o inteiro lido é realmente válido para um grafo
+        print(f"Erro: O numero de vertices deve ser positivo e maior que zero.")
+        return None, ""
+
+    matriz = []
+    
+    if len(linhas) - 1 != n: # Verifica se o número de linhas - 1, corresponde ao número de vértices
+        print(f"Erro: O numero de linhas de dados no arquivo ({len(linhas) - 1}) nao corresponde ao numero de vertices declarado ({n}).")
+        return None, ""
+
+    for i in range(n):
+        try: # Tenta converter cada linha para uma lista de números em ponto flutuante
+            linha_valores = list(map(float, linhas[i + 1].split()))
+        except ValueError: # Se a conversão não for possível, captura-se o erro e retorna
+            print(f"Erro: A linha {i + 2} do arquivo '{caminho}' contem valores nao numericos ou mal formatados.")
+            return None, ""
+        
+        if len(linha_valores) != n: # Verifica se a linha tem o tamanho de elementos esperado dado o número de vértices
+            print(f"Erro: A linha {i + 2} da matriz nao tem o numero esperado de colunas ({n}). O grafo nao e completo.")
+            return None, ""
+
+        matriz.append(linha_valores)
+
+    for i in range(n): # Verifica se a matriz possui simetria
+        for j in range(n):
+            if matriz[i][j] != matriz[j][i]:
+                print(f"Erro: O grafo nao e simetrico. Matriz[{i}][{j}] ({matriz[i][j]}) != Matriz[{j}][{i}] ({matriz[j][i]}).")
+                return None, ""
+
+    return matriz, "validado"
 
 def prim(grafo): # Algoritmo de prim para encontrar a árvore geradora mínima
     vertices = list(range(len(grafo)))  # Armazena os vértices em uma lista
@@ -51,7 +86,7 @@ def grafo_auxiliar(grafo, vertices): # Função que cria a estrutura aceita pela
     for u in vertices:
         for v in vertices: # Itera sobre todas as possibilidades de duplas de vértices
             peso = grafo[u][v] # Pega o peso da aresta (u, v)
-            if peso > 0 and u != v: # Ignora quando os vértices forem iguais
+            if u != v: # Ignora quando os vértices forem iguais
                 G.add_edge(u, v, weight=peso) # Adiciona a aresta no grafo especificando o peso (weight)
     return G # Retorna o grafo completo
 
@@ -88,34 +123,43 @@ def custo_total(grafo, ciclo): # Recebe o grafo completo, e o ciclo hamiltoniano
     return total
 
 def christofides(): # Função principal
-    grafo = leitura_arquivo("lin318.txt") # Informa o nome do arquivo .txt com a matriz de adjacência para passar para a função
-    mst = prim(grafo) # Encontra a árvore geradora mínima com base no grafo completo
+    grafo = None # Inicializa o grafo
+    status = "" # String de controle
 
-    print("Arvore geradora minima: \n")
-    print(mst)
-    peso_mst = 0.0
-    for v in mst.values(): # Itera sobre as listas de tuplas
-        for (_, p) in v: # Itera sobre as tuplas das listas
-            peso_mst += p # Soma o peso para obter o peso total da árvore geradora mínima
+    while status != "validado": # Enquanto o grafo não for válido, será solicitado ao usuário o nome do arquivo de um grafo válido
+        nome_arquivo = input("Por favor, digite o nome do arquivo .txt com a matriz de adjacencia (ex: lin318.txt): ")
+        grafo, status = leitura_arquivo_e_validacao(nome_arquivo) # Chama a função para ler e validar
+        # Caso status não seja "validado", reinicia-se o loop para pedir um novo arquivo
 
-    print(f"\nPeso total da Arvore geradora Minima: {peso_mst / 2}\n") # Como o grafo é não direcionado os pesos são somados 2 vezes, então precisa-se dividir por 2
+    print(f"\nGrafo '{nome_arquivo}' lido e validado com sucesso!")
+    if grafo:
+        mst = prim(grafo) # Encontra a árvore geradora mínima com base no grafo completo
 
-    impares = vertices_impares(mst) # Retorna a lista de vértices com grau ímpar da mst
-    aux = grafo_auxiliar(grafo, impares) # Retorna a estrutura de grafo completa dos vértices impares aceita pela função de emparelhamento
-    emparelhamento = nx.algorithms.matching.min_weight_matching(aux) # Chama a função de emparelhamento com o grafo formado pelo vértices impares
+        print("Arvore geradora minima: \n")
+        print(mst)
+        peso_mst = 0.0
+        for v in mst.values(): # Itera sobre as listas de tuplas
+            for (_, p) in v: # Itera sobre as tuplas das listas
+                peso_mst += p # Soma o peso para obter o peso total da árvore geradora mínima
 
-    for u, v in emparelhamento: # Adiciona as arestas de cada dupla de vértice emparelhada na mst, criando um multigrafo
-        peso = grafo[u][v]
-        mst[u].append((v, peso))
-        mst[v].append((u, peso))
+        print(f"\nPeso total da Arvore geradora Minima: {peso_mst / 2}\n") # Como o grafo é não direcionado os pesos são somados 2 vezes, então precisa-se dividir por 2
 
-    circuito = ciclo_euleriano(mst) # Encontra um ciclo euleriano no multigrafo
-    ciclo_final = ciclo_hamiltoniano(circuito) # Determina um ciclo hamiltoniano
-    custo = custo_total(grafo, ciclo_final) # Retorna o custo total do ciclo hamiltoniano encontrado
+        impares = vertices_impares(mst) # Retorna a lista de vértices com grau ímpar da mst
+        aux = grafo_auxiliar(grafo, impares) # Retorna a estrutura de grafo completa dos vértices impares aceita pela função de emparelhamento
+        emparelhamento = nx.algorithms.matching.min_weight_matching(aux) # Chama a função de emparelhamento com o grafo formado pelo vértices impares
 
-    print("Solucao aproximada encontrada por Christofides: ")
-    print(" -> ".join(map(str, ciclo_final))) # Transforma os valores inteiros em string e insere entre cada elemento uma seta, indicando a direção do ciclo
-    print(f"\nPeso total da solucao aproximada: {custo}\n")
+        for u, v in emparelhamento: # Adiciona as arestas de cada dupla de vértice emparelhada na mst, criando um multigrafo
+            peso = grafo[u][v]
+            mst[u].append((v, peso))
+            mst[v].append((u, peso))
+
+        circuito = ciclo_euleriano(mst) # Encontra um ciclo euleriano no multigrafo
+        ciclo_final = ciclo_hamiltoniano(circuito) # Determina um ciclo hamiltoniano
+        custo = custo_total(grafo, ciclo_final) # Retorna o custo total do ciclo hamiltoniano encontrado
+
+        print("Solucao aproximada encontrada por Christofides: ")
+        print(" -> ".join(map(str, ciclo_final))) # Transforma os valores inteiros em string e insere entre cada elemento uma seta, indicando a direção do ciclo
+        print(f"\nPeso total da solucao aproximada: {custo}\n")
 
 if __name__ == "__main__":
     christofides()
