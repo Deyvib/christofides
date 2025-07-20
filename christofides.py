@@ -56,7 +56,7 @@ def prim(grafo): # Algoritmo de prim para encontrar a árvore geradora mínima
     visitados = set() # Inicializa a estrutura hashset, utilizada para salvar os vértices já inseridos na árvore
     mst = {v: [] for v in vertices} # Inicializa a estrutura da árvore por meio de compressão de dicionário (chave: valor)
 
-    inicio = vertices[0] # Usa o vértice 0 como vértice inicial
+    inicio = vertices[0] # Usa o vértice 0 como vértice inicialwinget
     visitados.add(inicio) # Adiciona ele para os vértices já visitados
 
     heap = [] # Inicializa o heap para armazenar as arestas com os menores pesos
@@ -65,7 +65,7 @@ def prim(grafo): # Algoritmo de prim para encontrar a árvore geradora mínima
             # Nesse caso, todas as arestas conectadas ao vértice inicial serão adicionadas
             heapq.heappush(heap, (grafo[inicio][destino], inicio, destino))  # (peso, origem, destino)
 
-    while heap: # Após termos os valores iniciais iniciamos o algoritmo... Enquando a pilha não for vazia, faça:
+    while heap: # Após termos os valores iniciais, iniciamos o algoritmo... Enquando a pilha não for vazia, faça:
         peso, origem, destino = heapq.heappop(heap) # Remove a menor aresta do heap e armazena os respectivos valores nas variáveis
         if destino not in visitados: # Se o vértice de destino da aresta não existir na árvore, a aresta e o vértice podem ser adicionados
             visitados.add(destino) # Adiciona o novo vértice ao hashset
@@ -77,11 +77,11 @@ def prim(grafo): # Algoritmo de prim para encontrar a árvore geradora mínima
 
     return mst
 
-def vertices_impares(arvore_geradora): # Função que retornar os vértices de grau ímpar da árvore geradora mínima
+def vertices_impares(arvore_geradora): # Função que retorna os vértices de grau ímpar da árvore geradora mínima
     return [v for v, adj in arvore_geradora.items() if len(adj) % 2 != 0] # Faz uma compressão de lista para ->
     # retornar toda chave do dicionário (o vértice) que possui como valor uma lista com um número ímpar de elementos (a lista de adjacência do vértice)
 
-def grafo_auxiliar(grafo, vertices): # Função que cria a estrutura aceita pela função do emparelhamento, retornando um grafo completo com o vértices de grau ímpar
+def grafo_auxiliar(grafo, vertices): # Função que cria a estrutura aceita pela função do emparelhamento, retornando um grafo completo com os vértices de grau ímpar
     G = nx.Graph() # Inicializa a estrutura do grafo
     for u in vertices:
         for v in vertices: # Itera sobre todas as possibilidades de duplas de vértices
