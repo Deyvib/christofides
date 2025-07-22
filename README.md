@@ -8,7 +8,8 @@ Você também precisará instalar a biblioteca usada para o emparelhamento perfe
 
 Vá até o diretório do programa e rode-o com:
 
-``` python christofides.py ```
+Windows: ``` python christofides.py ```
+Linux: ``` python3 christofides.py ```
 
 Ou use alguma IDE 
 
