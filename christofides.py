@@ -45,8 +45,8 @@ def leitura_arquivo_e_validacao(caminho: str):
 
     for i in range(n): # Verifica se a matriz possui simetria
         for j in range(n):
-            if matriz[i][j] != matriz[j][i]:
-                print(f"Erro: O grafo nao e simetrico. Matriz[{i}][{j}] ({matriz[i][j]}) != Matriz[{j}][{i}] ({matriz[j][i]}).")
+            if matriz[i][j] != matriz[j][i] or matriz[i][j] < 0:
+                print(f"Erro: O grafo nao e simetrico ou possui pesos negativos. Matriz[{i + 1}][{j + 1}] ({matriz[i][j]}) != Matriz[{j + 1}][{i + 1}] ({matriz[j][i]}) ou < 0.")
                 return None, ""
 
     return matriz, "validado"
